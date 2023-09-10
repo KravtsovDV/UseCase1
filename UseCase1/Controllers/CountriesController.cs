@@ -54,10 +54,18 @@ namespace UseCase1.Controllers
 
             var query = countries.AsQueryable();
 
-            query = _countryProcessingService.FilterByCountryName(query, countryNameFilter);
-            query = _countryProcessingService.FilterByPopulation(query, countryPopulationFilter);
+            try
+            {
+                query = _countryProcessingService.FilterByCountryName(query, countryNameFilter);
+                query = _countryProcessingService.FilterByPopulation(query, countryPopulationFilter);
+                query = _countryProcessingService.SortByCountryName(query, sortOrder ?? "ascend"); // Use the renamed parameter
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message); // Handle incorrect sortOrder value
+            }
 
-            // TODO: Add processing for other parameters (sortOrder, pagination)
+            // TODO: Add processing for other parameters (pagination)
 
             return Ok(query.ToList());
         }

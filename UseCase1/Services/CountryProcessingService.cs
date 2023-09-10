@@ -26,5 +26,20 @@ namespace UseCase1.Services
             int populationInMillions = countryPopulationFilter.Value * 1000000;
             return countries.Where(c => c.Population.HasValue && c.Population.Value < populationInMillions);
         }
+
+        public IQueryable<CountryDto> SortByCountryName(IQueryable<CountryDto> countries, string countryNameSortOrder)
+        {
+            switch (countryNameSortOrder.ToLowerInvariant())
+            {
+                case "ascend":
+                    return countries.OrderBy(c => c.Name == null ? string.Empty : c.Name.Common);
+
+                case "descend":
+                    return countries.OrderByDescending(c => c.Name == null ? string.Empty : c.Name.Common);
+
+                default:
+                    throw new ArgumentException($"The {nameof(countryNameSortOrder)} value is incorrect. It must be 'ascend' or 'descend'.");
+            }
+        }
     }
 }

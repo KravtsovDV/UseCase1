@@ -23,5 +23,14 @@ namespace UseCase1.Services
         /// <param name="countryPopulationFilter">The population filter in millions. Can be <see langword="null"/>, in which case no filtering is applied.</param>
         /// <returns>A filtered collection of <see cref="CountryDto"/> objects where the population is less than the population filter multiplied by 1 million. If the <paramref name="countryPopulationFilter"/> is <see langword="null"/>, the original collection is returned.</returns>
         IQueryable<CountryDto> FilterByPopulation(IQueryable<CountryDto> countries, int? countryPopulationFilter);
+
+        /// <summary>
+        /// Sorts the collection of countries by the common name in either ascending or descending order based on the provided sort order parameter.
+        /// </summary>
+        /// <param name="countries">A collection of <see cref="CountryDto"/> objects representing the countries to sort.</param>
+        /// <param name="countryNameSortOrder">The sort order parameter which can either be "ascend" or "descend". Any other value will throw an argument exception.</param>
+        /// <returns>A collection of <see cref="CountryDto"/> objects sorted by the common name in the specified order.</returns>
+        /// <exception cref="ArgumentException">Thrown when an incorrect value is provided for the countryNameSortOrder parameter.</exception>
+        IQueryable<CountryDto> SortByCountryName(IQueryable<CountryDto> countries, string countryNameSortOrder);
     }
 }
