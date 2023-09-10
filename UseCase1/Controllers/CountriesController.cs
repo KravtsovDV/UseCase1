@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using UseCase1.DTO;
+using UseCase1.Services;
 
 namespace UseCase1.Controllers
 {
@@ -9,10 +10,12 @@ namespace UseCase1.Controllers
     public class CountriesController : ControllerBase
     {
         private readonly HttpClient _httpClient;
+        private readonly ICountryProcessingService _countryProcessingService;
 
-        public CountriesController(HttpClient httpClient)
+        public CountriesController(HttpClient httpClient, ICountryProcessingService countryProcessingService)
         {
             _httpClient = httpClient;
+            _countryProcessingService = countryProcessingService;
         }
 
         [HttpGet]
@@ -51,7 +54,9 @@ namespace UseCase1.Controllers
 
             var query = countries.AsQueryable();
 
-            // TODO: Add parameter processing here
+            query = _countryProcessingService.FilterByCountryName(query, countryNameFilter);
+
+            // TODO: Add processing for other parameters (countryPopulationFilter, sortOrder, pagination)
 
             return Ok(query.ToList());
         }
