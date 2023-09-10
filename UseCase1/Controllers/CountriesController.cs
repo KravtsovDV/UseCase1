@@ -55,8 +55,9 @@ namespace UseCase1.Controllers
             var query = countries.AsQueryable();
 
             query = _countryProcessingService.FilterByCountryName(query, countryNameFilter);
+            query = _countryProcessingService.FilterByPopulation(query, countryPopulationFilter);
 
-            // TODO: Add processing for other parameters (countryPopulationFilter, sortOrder, pagination)
+            // TODO: Add processing for other parameters (sortOrder, pagination)
 
             return Ok(query.ToList());
         }

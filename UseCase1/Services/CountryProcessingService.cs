@@ -15,5 +15,16 @@ namespace UseCase1.Services
                                         c.Name.Common != null &&
                                         c.Name.Common.Contains(countryNameFilter, StringComparison.OrdinalIgnoreCase));
         }
+
+        public IQueryable<CountryDto> FilterByPopulation(IQueryable<CountryDto> countries, int? countryPopulationFilter)
+        {
+            if (!countryPopulationFilter.HasValue)
+            {
+                return countries;
+            }
+
+            int populationInMillions = countryPopulationFilter.Value * 1000000;
+            return countries.Where(c => c.Population.HasValue && c.Population.Value < populationInMillions);
+        }
     }
 }
