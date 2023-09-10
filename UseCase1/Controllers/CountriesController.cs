@@ -23,7 +23,7 @@ namespace UseCase1.Controllers
             string? countryNameFilter = null,
             int? countryPopulationFilter = null,
             string? sortOrder = "ascend",
-            [FromQuery] PaginationDto? pagination = null)
+            int? recordLimit = null)
         {
             HttpResponseMessage response;
             try
@@ -58,14 +58,13 @@ namespace UseCase1.Controllers
             {
                 query = _countryProcessingService.FilterByCountryName(query, countryNameFilter);
                 query = _countryProcessingService.FilterByPopulation(query, countryPopulationFilter);
-                query = _countryProcessingService.SortByCountryName(query, sortOrder ?? "ascend"); // Use the renamed parameter
+                query = _countryProcessingService.SortByCountryName(query, sortOrder ?? "ascend");
+                query = _countryProcessingService.LimitRecords(query, recordLimit);
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(ex.Message); // Handle incorrect sortOrder value
+                return BadRequest(ex.Message);
             }
-
-            // TODO: Add processing for other parameters (pagination)
 
             return Ok(query.ToList());
         }
