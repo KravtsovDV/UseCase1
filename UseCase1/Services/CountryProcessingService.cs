@@ -41,5 +41,15 @@ namespace UseCase1.Services
                     throw new ArgumentException($"The {nameof(countryNameSortOrder)} value is incorrect. It must be 'ascend' or 'descend'.");
             }
         }
+
+        public IQueryable<CountryDto> LimitRecords(IQueryable<CountryDto> countries, int? recordLimit)
+        {
+            if (!recordLimit.HasValue)
+            {
+                return countries;
+            }
+
+            return countries.Take(recordLimit.Value);
+        }
     }
 }

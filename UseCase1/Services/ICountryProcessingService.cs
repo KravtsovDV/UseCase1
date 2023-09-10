@@ -32,5 +32,14 @@ namespace UseCase1.Services
         /// <returns>A collection of <see cref="CountryDto"/> objects sorted by the common name in the specified order.</returns>
         /// <exception cref="ArgumentException">Thrown when an incorrect value is provided for the countryNameSortOrder parameter.</exception>
         IQueryable<CountryDto> SortByCountryName(IQueryable<CountryDto> countries, string countryNameSortOrder);
+
+        /// <summary>
+        /// Limits the number of records in the country collection to the specified number.
+        /// If the <paramref name="recordLimit"/> parameter is null, no limitation is applied.
+        /// </summary>
+        /// <param name="countries">A collection of <see cref="CountryDto"/> objects representing the countries to limit.</param>
+        /// <param name="recordLimit">The number of records to retrieve. Can be <see langword="null"/>, in which case no limitation is applied.</param>
+        /// <returns>A collection of <see cref="CountryDto"/> objects limited to the specified number of records or the original collection if <paramref name="recordLimit"/> is <see langword="null"/>.</returns>
+        IQueryable<CountryDto> LimitRecords(IQueryable<CountryDto> countries, int? recordLimit);
     }
 }
