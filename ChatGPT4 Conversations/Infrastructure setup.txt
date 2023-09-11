@@ -972,3 +972,155 @@ This is a simple representation, and the messages are abbreviated. You can repla
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+User
+As a result of today's conversation I have following projects:
+ASP.NET Core WebAPI  project called 'UseCase1 '
+Test project with xUnit called 'UseCase1.Tests'
+
+Also, I host this solution on GitHub and added SonarCloud to Actions so that code coverage is checked every time commit is pushed to GitHub repository.
+My build.yml file from .github/workflows folder looks like this:
+
+name: SonarCloud
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+jobs:
+  build:
+    name: Build and analyze
+    runs-on: windows-latest
+    steps:
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: 'zulu' # Alternative distribution options are available.
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v3
+        with:
+          path: ~\sonar\cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+      - name: Cache SonarCloud scanner
+        id: cache-sonar-scanner
+        uses: actions/cache@v3
+        with:
+          path: .\.sonar\scanner
+          key: ${{ runner.os }}-sonar-scanner
+          restore-keys: ${{ runner.os }}-sonar-scanner
+      - name: Install SonarCloud scanner
+        if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
+        shell: powershell
+        run: |
+          New-Item -Path .\.sonar\scanner -ItemType Directory
+          dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
+      - name: Build and analyze
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        shell: powershell
+        run: |
+          .\.sonar\scanner\dotnet-sonarscanner begin /k:"KravtsovDV_UseCase1" /o:"kravtsovdv" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
+          dotnet build
+          .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+
+
+How should it be updated so that SonarCloud also checks code coverage?
+ChatGPT
+To check code coverage using SonarCloud in your GitHub Actions workflow, you will need to integrate a code coverage tool such as coverlet to generate coverage reports during the test phase and then pass this data to SonarCloud during the analysis phase.
+
+First, add coverlet.msbuild to your test project(s) (UseCase1.Tests) as a NuGet package. You can do this via the dotnet CLI:
+
+sh
+Copy code
+dotnet add UseCase1.Tests/UseCase1.Tests.csproj package coverlet.msbuild
+Next, update your build workflow to include steps to run the tests with coverage and then pass the generated coverage report to the SonarCloud scanner. Here's how you can do it:
+
+yaml
+Copy code
+name: SonarCloud
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+jobs:
+  build:
+    name: Build and analyze
+    runs-on: windows-latest
+    steps:
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: 'zulu' # Alternative distribution options are available.
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v3
+        with:
+          path: ~\sonar\cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+      - name: Cache SonarCloud scanner
+        id: cache-sonar-scanner
+        uses: actions/cache@v3
+        with:
+          path: .\.sonar\scanner
+          key: ${{ runner.os }}-sonar-scanner
+          restore-keys: ${{ runner.os }}-sonar-scanner
+      - name: Install SonarCloud scanner
+        if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
+        shell: powershell
+        run: |
+          New-Item -Path .\.sonar\scanner -ItemType Directory
+          dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
+      - name: Build and analyze
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        shell: powershell
+        run: |
+          .\.sonar\scanner\dotnet-sonarscanner begin /k:"KravtsovDV_UseCase1" /o:"kravtsovdv" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
+          dotnet build
+          dotnet test UseCase1.Tests/UseCase1.Tests.csproj /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
+          .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
+Changes made:
+
+Added dotnet test UseCase1.Tests/UseCase1.Tests.csproj /p:CollectCoverage=true /p:CoverletOutputFormat=opencover to run tests with coverage using Coverlet.
+Added /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" to the dotnet-sonarscanner end command to specify the path to the coverage report generated by Coverlet.
+Make sure to adjust the project path (UseCase1.Tests/UseCase1.Tests.csproj) and coverage report path (**/coverage.opencover.xml) as necessary based on your project structure.
+
+
+
