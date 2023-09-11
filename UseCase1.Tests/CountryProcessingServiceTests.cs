@@ -27,9 +27,9 @@ namespace UseCase1.Tests
         }
 
         [Theory]
-        [InlineData("in", new[] { "India", "Small Country" })]
-        [InlineData("IN", new[] { "India", "Small Country" })]
-        [InlineData("Country", new[] { "Small Country" })]
+        [InlineData("in", new[] { "India" })]
+        [InlineData("IN", new[] { "India" })]
+        [InlineData("Country", new[] { "Small Country", "Mid Country" })]
         public void FilterByCountryName_ShouldFilterCorrectly(string filter, string[] expectedResults)
         {
             // Arrange
@@ -61,13 +61,13 @@ namespace UseCase1.Tests
         {
             // Arrange
             var countries = GetTestCountries();
-            int? populationFilter = 1000;
+            int? populationFilter = 1000; // Representing 1 billion
 
             // Act
             var result = _service.FilterByPopulation(countries, populationFilter);
 
             // Assert
-            Assert.Equal(new[] { "Small Country", "Mid Country" }, result.Select(r => r.Name == null ? null : r.Name.Common));
+            Assert.Equal(new[] { "USA", "Small Country", "Mid Country" }, result.Select(r => r.Name == null ? null : r.Name.Common));
         }
 
         [Theory]
